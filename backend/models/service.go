@@ -1,8 +1,6 @@
 package models
 
-import "gorm.io/gorm"
-
 type Service struct {
-    gorm.Model
+    ID   uint   `gorm:"primaryKey;autoIncrement" json:"id"`
     Name string `json:"name"`
 }

@@ -1,0 +1,45 @@
+{
+    "clients": [
+     { "name": "John Doe", "address": "123 Elm Street", "state": "CA", "zip_code": "90001", "phone_number": "555-1234" },
+     { "name": "Jane Smith", "address": "456 Oak Street", "state": "NY", "zip_code": "10001", "phone_number": "555-5678" },
+     { "name": "Alice Johnson", "address": "789 Pine Street", "state": "TX", "zip_code": "73301", "phone_number": "555-9101" }
+   ],
+    "services": [
+      { "name": "Oil Change" },
+      { "name": "Brake Inspection" },
+      { "name": "Tire Rotation" },
+      { "name": "Engine Diagnostic" },
+      { "name": "Battery Replacement" },
+      { "name": "Transmission Repair" },
+      { "name": "Wheel Alignment" },
+      { "name": "Suspension Repair" },
+      { "name": "AC Service" }
+    ],
+    "appointments": [
+      {
+        "schedule_name": "Morning Oil Change",
+        "description": "Routine oil change service",
+        "client_id": 1,
+        "service_id": 1,
+        "schedule_date": "2024-06-21T08:00:00Z",
+        "schedule_time": "08:00:00"
+      },
+      {
+        "schedule_name": "Brake Inspection",
+        "description": "Check and replace brake pads if necessary",
+        "client_id": 2,
+        "service_id": 2,
+        "schedule_date": "2024-06-21T10:00:00Z",
+        "schedule_time": "10:00:00"
+      },
+      {
+        "schedule_name": "Tire Rotation",
+        "description": "Rotate all tires",
+        "client_id": 3,
+        "service_id": 3,
+        "schedule_date": "2024-06-21T13:00:00Z",
+        "schedule_time": "13:00:00"
+      }
+    ]
+  }
+  

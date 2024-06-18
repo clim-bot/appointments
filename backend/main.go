@@ -38,7 +38,6 @@ func main() {
 	// Populate mock data if enabled
 	if os.Getenv("USE_MOCK_DATA") == "true" {
 		populateMockData()
-		populateMockAppointments()
 	}
 
 	// Setup routes
@@ -53,35 +52,30 @@ func main() {
 }
 
 func populateMockData() {
-	var clients []models.Client
-	file, err := os.ReadFile("mock_data.json")
+	var data struct {
+		Clients     []models.Client     `json:"clients"`
+		Services    []models.Service    `json:"services"`
+		Appointments []models.Appointment `json:"appointments"`
+	}
+
+	file, err := os.ReadFile("data/db.json")
 	if err != nil {
 		log.Fatal("Error reading mock data file:", err)
 	}
 
-	if err := json.Unmarshal(file, &clients); err != nil {
+	if err := json.Unmarshal(file, &data); err != nil {
 		log.Fatal("Error unmarshalling mock data:", err)
 	}
 
-	for _, client := range clients {
+	for _, client := range data.Clients {
 		config.DB.FirstOrCreate(&client, models.Client{Name: client.Name})
 	}
+
+	for _, service := range data.Services {
+		config.DB.FirstOrCreate(&service, models.Service{Name: service.Name})
+	}
+
+	for _, appointment := range data.Appointments {
+		config.DB.FirstOrCreate(&appointment, models.Appointment{ScheduleName: appointment.ScheduleName})
+	}
 }
-
-func populateMockAppointments() {
-    var appointments []models.Appointment
-    file, err := os.ReadFile("mock_appointments.json")
-    if err != nil {
-        log.Fatal("Error reading mock appointments file:", err)
-    }
-
-    if err := json.Unmarshal(file, &appointments); err != nil {
-        log.Fatal("Error unmarshalling mock appointments:", err)
-    }
-
-    for _, appointment := range appointments {
-        config.DB.FirstOrCreate(&appointment, models.Appointment{ScheduleName: appointment.ScheduleName})
-    }
-}
-
-

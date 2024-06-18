@@ -33,7 +33,7 @@ const Layout = ({ children }) => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap>
-            MyApp
+            Appointment App
           </Typography>
         </Toolbar>
       </AppBar>
@@ -53,9 +53,9 @@ const Layout = ({ children }) => {
               <DashboardIcon />
               <ListItemText primary="Dashboard" />
             </ListItem>
-            <ListItem button onClick={() => handleNavigation('/schedule')}>
+            <ListItem button onClick={() => handleNavigation('/appointment')}>
               <ScheduleIcon />
-              <ListItemText primary="Schedule" />
+              <ListItemText primary="Appointment" />
             </ListItem>
             <ListItem button onClick={() => handleNavigation('/settings')}>
               <SettingsIcon />

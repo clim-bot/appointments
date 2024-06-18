@@ -20,7 +20,6 @@ func SetupRoutes(router *gin.Engine) {
         protected.GET("/dashboard", controllers.Dashboard)
         protected.GET("/profile", controllers.Profile)
         protected.GET("/settings", controllers.Settings)
-        protected.GET("/schedule", controllers.GetSchedule)
 
         // Client routes
         protected.GET("/clients", controllers.GetClients)
