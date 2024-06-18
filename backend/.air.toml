@@ -1,0 +1,9 @@
+# .air.toml
+[build]
+bin = "tmp/main" # Output binary location
+cmd = "go build -o ./tmp/main" # Command to build the project
+exclude_dir = ["frontend", "tmp", "vendor", "node_modules"] # Directories to exclude
+exclude_file = ["*.md", "*.toml"] # Files to exclude
+
+[log]
+level = "info"

@@ -1,0 +1,23 @@
+[
+    {
+        "schedule_name": "Morning Oil Change",
+        "description": "Routine oil change service",
+        "client_id": 1,
+        "service_id": 1,
+        "schedule_date": "2024-06-21T08:00:00Z"
+    },
+    {
+        "schedule_name": "Brake Inspection",
+        "description": "Check and replace brake pads if necessary",
+        "client_id": 2,
+        "service_id": 2,
+        "schedule_date": "2024-06-21T10:00:00Z"
+    },
+    {
+        "schedule_name": "Tire Rotation",
+        "description": "Rotate all tires",
+        "client_id": 3,
+        "service_id": 3,
+        "schedule_date": "2024-06-21T13:00:00Z"
+    }
+]
