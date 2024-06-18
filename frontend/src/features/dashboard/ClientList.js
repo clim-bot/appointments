@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../api/axiosInstance';
-import usStates from '../../data/usStates.json';
 import {
   Container, Typography, Box, CircularProgress, Button, Table, TableBody, TableCell, TableHead, TableRow,
-  TableContainer, TableSortLabel, TablePagination, TextField, Paper, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Snackbar
+  TableContainer, TableSortLabel, TablePagination, TextField, Paper, Snackbar
 } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
+import AddClientDialog from './AddClientDialog';
+import EditClientDialog from './EditClientDialog';
+import DeleteClientDialog from './DeleteClientDialog';
 
 const Alert = React.forwardRef((props, ref) => {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -19,30 +21,28 @@ const ClientList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState('');
-  const [open, setOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [currentClient, setCurrentClient] = useState({ id: '', name: '', address: '', state: '', zip_code: '', phone_number: '' });
-  const [dialogType, setDialogType] = useState('add'); // 'add' or 'edit'
-  const [clientToDelete, setClientToDelete] = useState(null);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [currentClient, setCurrentClient] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axiosInstance.get('/clients');
-        setClients(response.data.clients);
-        setLoading(false);
-      } catch (error) {
-        console.error('Fetch clients error', error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchClients();
   }, []);
+
+  const fetchClients = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get('/clients');
+      setClients(response.data.clients);
+    } catch (error) {
+      console.error('Fetch clients error', error);
+    }
+    setLoading(false);
+  };
 
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -64,83 +64,32 @@ const ClientList = () => {
     setPage(0);
   };
 
-  const handleOpenDialog = (client = { id: '', name: '', address: '', state: '', zip_code: '', phone_number: '' }, type = 'add') => {
+  const handleOpenAddDialog = () => {
+    setAddDialogOpen(true);
+  };
+
+  const handleCloseAddDialog = () => {
+    setAddDialogOpen(false);
+  };
+
+  const handleOpenEditDialog = (client) => {
     setCurrentClient(client);
-    setDialogType(type);
-    setValidationErrors({});
-    setOpen(true);
+    setEditDialogOpen(true);
   };
 
-  const handleCloseDialog = () => {
-    setOpen(false);
-    setCurrentClient({ id: '', name: '', address: '', state: '', zip_code: '', phone_number: '' });
-    setValidationErrors({});
-  };
-
-  const validateClient = () => {
-    const errors = {};
-    if (!currentClient.name) errors.name = 'Name is required';
-    if (!currentClient.address) errors.address = 'Address is required';
-    if (!currentClient.state) errors.state = 'State is required';
-    if (!currentClient.zip_code) errors.zip_code = 'Zip code is required';
-    if (!/^\d{5}(-\d{4})?$/.test(currentClient.zip_code)) errors.zip_code = 'Zip code is invalid';
-    if (currentClient.phone_number && !/^\d{3}-\d{3}-\d{4}$/.test(currentClient.phone_number)) {
-      errors.phone_number = 'Phone number is invalid';
-    }
-    return errors;
-  };
-
-  const handleSaveClient = async () => {
-    const errors = validateClient();
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
-    try {
-      if (dialogType === 'add') {
-        await axiosInstance.post('/clients', currentClient);
-        setSnackbarMessage('Client added successfully');
-      } else {
-        await axiosInstance.put(`/clients/${currentClient.id}`, currentClient);
-        setSnackbarMessage('Client updated successfully');
-      }
-      setSnackbarSeverity('success');
-      const response = await axiosInstance.get('/clients');
-      setClients(response.data.clients);
-      handleCloseDialog();
-    } catch (error) {
-      console.error('Save client error', error);
-      setSnackbarMessage('Error saving client');
-      setSnackbarSeverity('error');
-    }
-    setSnackbarOpen(true);
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setCurrentClient(null);
   };
 
   const handleOpenDeleteDialog = (client) => {
-    setClientToDelete(client);
+    setCurrentClient(client);
     setDeleteDialogOpen(true);
   };
 
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setClientToDelete(null);
-  };
-
-  const handleConfirmDelete = async () => {
-    try {
-      await axiosInstance.delete(`/clients/${clientToDelete.id}`);
-      const response = await axiosInstance.get('/clients');
-      setClients(response.data.clients);
-      setSnackbarMessage('Client deleted successfully');
-      setSnackbarSeverity('success');
-      handleCloseDeleteDialog();
-    } catch (error) {
-      console.error('Delete client error', error);
-      setSnackbarMessage('Error deleting client');
-      setSnackbarSeverity('error');
-    }
-    setSnackbarOpen(true);
+    setCurrentClient(null);
   };
 
   const filteredClients = clients.filter((client) =>
@@ -181,7 +130,7 @@ const ClientList = () => {
           onChange={handleSearch}
           variant="outlined"
         />
-        <Button variant="contained" color="primary" onClick={() => handleOpenDialog()}>
+        <Button variant="contained" color="primary" onClick={handleOpenAddDialog}>
           Add Client
         </Button>
       </Box>
@@ -237,7 +186,7 @@ const ClientList = () => {
                       <TableCell>{client.zip_code}</TableCell>
                       <TableCell>{client.phone_number}</TableCell>
                       <TableCell>
-                        <Button variant="outlined" color="primary" onClick={() => handleOpenDialog(client, 'edit')}>
+                        <Button variant="outlined" color="primary" onClick={() => handleOpenEditDialog(client)}>
                           Edit
                         </Button>
                         <Button variant="outlined" color="secondary" onClick={() => handleOpenDeleteDialog(client)}>
@@ -267,90 +216,38 @@ const ClientList = () => {
           />
         </Paper>
       )}
-      <Dialog open={open} onClose={handleCloseDialog}>
-        <DialogTitle>{dialogType === 'add' ? 'Add Client' : 'Edit Client'}</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Name"
-            name="name"
-            value={currentClient.name}
-            onChange={(e) => setCurrentClient({ ...currentClient, name: e.target.value })}
-            fullWidth
-            margin="normal"
-            error={!!validationErrors.name}
-            helperText={validationErrors.name}
-          />
-          <TextField
-            label="Address"
-            name="address"
-            value={currentClient.address}
-            onChange={(e) => setCurrentClient({ ...currentClient, address: e.target.value })}
-            fullWidth
-            margin="normal"
-            error={!!validationErrors.address}
-            helperText={validationErrors.address}
-          />
-          <TextField
-            select
-            label="State"
-            name="state"
-            value={currentClient.state}
-            onChange={(e) => setCurrentClient({ ...currentClient, state: e.target.value })}
-            fullWidth
-            margin="normal"
-            error={!!validationErrors.state}
-            helperText={validationErrors.state}
-          >
-            {usStates.map((state) => (
-              <MenuItem key={state.abbreviation} value={state.abbreviation}>
-                {state.name}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            label="Zip Code"
-            name="zip_code"
-            value={currentClient.zip_code}
-            onChange={(e) => setCurrentClient({ ...currentClient, zip_code: e.target.value })}
-            fullWidth
-            margin="normal"
-            error={!!validationErrors.zip_code}
-            helperText={validationErrors.zip_code}
-          />
-          <TextField
-            label="Phone"
-            name="phone_number"
-            value={currentClient.phone_number}
-            onChange={(e) => setCurrentClient({ ...currentClient, phone_number: e.target.value })}
-            fullWidth
-            margin="normal"
-            error={!!validationErrors.phone_number}
-            helperText={validationErrors.phone_number}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSaveClient} color="secondary">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this client?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="secondary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AddClientDialog
+        open={addDialogOpen}
+        handleClose={handleCloseAddDialog}
+        fetchClients={fetchClients}
+        setSnackbar={({ message, severity }) => {
+          setSnackbarMessage(message);
+          setSnackbarSeverity(severity);
+          setSnackbarOpen(true);
+        }}
+      />
+      <EditClientDialog
+        open={editDialogOpen}
+        handleClose={handleCloseEditDialog}
+        fetchClients={fetchClients}
+        setSnackbar={({ message, severity }) => {
+          setSnackbarMessage(message);
+          setSnackbarSeverity(severity);
+          setSnackbarOpen(true);
+        }}
+        client={currentClient}
+      />
+      <DeleteClientDialog
+        open={deleteDialogOpen}
+        handleClose={handleCloseDeleteDialog}
+        fetchClients={fetchClients}
+        setSnackbar={({ message, severity }) => {
+          setSnackbarMessage(message);
+          setSnackbarSeverity(severity);
+          setSnackbarOpen(true);
+        }}
+        client={currentClient}
+      />
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
         <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
           {snackbarMessage}
