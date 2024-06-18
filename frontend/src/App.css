@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+.rbc-event {
+  white-space: normal;
+}
+
+.rbc-month-view {
+  min-height: calc(100vh - 200px); /* Adjust the value based on your layout */
+}

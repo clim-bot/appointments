@@ -16,6 +16,7 @@ const AddAppointmentForm = ({ handleClose, fetchAppointments }) => {
     schedule_date: '',
     schedule_time: ''
   });
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,8 +39,23 @@ const AddAppointmentForm = ({ handleClose, fetchAppointments }) => {
     setAppointment({ ...appointment, [e.target.name]: e.target.value });
   };
 
+  const validate = () => {
+    const errors = {};
+    if (!appointment.schedule_name) errors.schedule_name = 'Schedule name is required';
+    if (!appointment.client_id) errors.client_id = 'Client is required';
+    if (!appointment.service_id) errors.service_id = 'Service is required';
+    if (!appointment.schedule_date) errors.schedule_date = 'Schedule date is required';
+    if (!appointment.schedule_time) errors.schedule_time = 'Schedule time is required';
+
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
+    console.log('Appointment Data:', appointment); // Log the appointment data
     try {
       await axiosInstance.post('/appointments', appointment);
       fetchAppointments();
@@ -65,6 +81,8 @@ const AddAppointmentForm = ({ handleClose, fetchAppointments }) => {
           onChange={handleChange}
           fullWidth
           margin="normal"
+          error={!!errors.schedule_name}
+          helperText={errors.schedule_name}
         />
         <TextField
           label="Description"
@@ -82,6 +100,8 @@ const AddAppointmentForm = ({ handleClose, fetchAppointments }) => {
           onChange={handleChange}
           fullWidth
           margin="normal"
+          error={!!errors.client_id}
+          helperText={errors.client_id}
         >
           {clients.map((client) => (
             <MenuItem key={client.id} value={client.id}>
@@ -97,6 +117,8 @@ const AddAppointmentForm = ({ handleClose, fetchAppointments }) => {
           onChange={handleChange}
           fullWidth
           margin="normal"
+          error={!!errors.service_id}
+          helperText={errors.service_id}
         >
           {services.map((service) => (
             <MenuItem key={service.id} value={service.id}>
@@ -115,6 +137,8 @@ const AddAppointmentForm = ({ handleClose, fetchAppointments }) => {
           InputLabelProps={{
             shrink: true,
           }}
+          error={!!errors.schedule_date}
+          helperText={errors.schedule_date}
         />
         <TextField
           label="Schedule Time"
@@ -127,6 +151,8 @@ const AddAppointmentForm = ({ handleClose, fetchAppointments }) => {
           InputLabelProps={{
             shrink: true,
           }}
+          error={!!errors.schedule_time}
+          helperText={errors.schedule_time}
         />
         <Box mt={2} display="flex" justifyContent="space-between">
           <Button onClick={handleClose} color="primary">
