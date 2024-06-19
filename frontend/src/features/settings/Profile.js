@@ -1,31 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import { Container, Card, CardContent, CardHeader, Avatar, Typography, CircularProgress, Box, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import ChangePasswordModal from '../../components/ChangePasswordModal';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:8080/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axiosInstance.get('/settings'); // Adjust the endpoint if necessary
         setUser(response.data.user);
-        setLoading(false);
       } catch (error) {
-        console.error('Fetch user error', error);
+        console.error('Fetch user error', error.response ? error.response.data : error.message);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchData();
   }, []);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <Container sx={{ mt: 4 }}>
@@ -48,7 +52,7 @@ function Profile() {
             <Typography variant="body1" color="text.secondary">
               This is the profile page of {user.name}.
             </Typography>
-            <Button component={Link} to="/settings/change-password" variant="contained" color="primary" sx={{ mt: 2 }}>
+            <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleOpenModal}>
               Change Password
             </Button>
           </CardContent>
@@ -58,6 +62,7 @@ function Profile() {
           Error loading user data.
         </Typography>
       )}
+      <ChangePasswordModal open={isModalOpen} handleClose={handleCloseModal} />
     </Container>
   );
 }

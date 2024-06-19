@@ -17,9 +17,8 @@ func SetupRoutes(router *gin.Engine) {
     protected := router.Group("/")
     protected.Use(middleware.Auth())
     {
-        protected.GET("/dashboard", controllers.Dashboard)
-        protected.GET("/profile", controllers.Profile)
-        protected.GET("/settings", controllers.Settings)
+        protected.GET("/settings", controllers.Profile)
+        protected.POST("/settings/change-password", controllers.ChangePassword)
 
         // Client routes
         protected.GET("/clients", controllers.GetClients)

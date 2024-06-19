@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import Profile from './Profile';
-import ChangePassword from './ChangePassword';
+import ChangePassword from '../../components/ChangePasswordModal';
 
 function Settings() {
   return (

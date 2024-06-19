@@ -10,32 +10,33 @@ import (
 	"os"
 	"strings"
 	"time"
+	"log"
 )
 
 func Register(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    var user models.User
+    if err := c.ShouldBindJSON(&user); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash password"})
-		return
-	}
-	user.Password = string(hashedPassword)
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash password"})
+        return
+    }
+    user.Password = string(hashedPassword)
 
-	if err := config.DB.Create(&user).Error; err != nil {
-		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Email is already registered"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		}
-		return
-	}
+    if err := config.DB.Create(&user).Error; err != nil {
+        if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Email is already registered"})
+        } else {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        }
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
+    c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
 }
 
 func Login(c *gin.Context) {
@@ -71,38 +72,80 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
-func Dashboard(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	var user models.User
-	if err := config.DB.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"user": user})
-}
 
 func Profile(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-	// Fetch and return user profile information
-	c.JSON(http.StatusOK, gin.H{"message": "Profile", "user_id": userID})
+    userID, exists := c.Get("user_id")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
+        return
+    }
+
+    var user models.User
+    if err := config.DB.First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"user": user})
 }
 
-func Settings(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-	// Fetch and return user settings information
-	c.JSON(http.StatusOK, gin.H{"message": "Settings", "user_id": userID})
+func ChangePassword(c *gin.Context) {
+    var req struct {
+        OldPassword     string `json:"oldPassword"`
+        NewPassword     string `json:"newPassword"`
+        ConfirmPassword string `json:"confirmPassword"`
+    }
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    userID, exists := c.Get("user_id")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
+        return
+    }
+
+    var user models.User
+    if err := config.DB.First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
+        return
+    }
+
+    oldPassword := strings.TrimSpace(req.OldPassword)
+    newPassword := strings.TrimSpace(req.NewPassword)
+    confirmPassword := strings.TrimSpace(req.ConfirmPassword)
+
+    log.Printf("OldPassword: %s", oldPassword)
+    log.Printf("Stored Hashed Password: %s", user.Password)
+
+    err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword))
+    if err != nil {
+        log.Printf("Password comparison error: %v", err)
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Old password is incorrect"})
+        return
+    }
+
+    log.Println("Old password is correct")
+
+    if newPassword != confirmPassword {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "New passwords do not match"})
+        return
+    }
+
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash new password"})
+        return
+    }
+
+    user.Password = string(hashedPassword)
+    if err := config.DB.Save(&user).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
 }
+
+
