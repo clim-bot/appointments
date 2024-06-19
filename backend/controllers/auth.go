@@ -217,7 +217,7 @@ func generateResetToken() string {
 }
 
 func sendResetEmail(email, resetLink string) error {
-	from := "no-reply@myapp.com"
+	from := "no-reply@appt-mail.com"
 	password := "" // No password needed for MailHog
 	smtpHost := "localhost"
 	smtpPort := "1025"

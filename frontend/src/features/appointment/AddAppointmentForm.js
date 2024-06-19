@@ -47,6 +47,34 @@ const AddAppointmentForm = ({ handleClose, fetchAppointments }) => {
     if (!appointment.schedule_date) errors.schedule_date = 'Schedule date is required';
     if (!appointment.schedule_time) errors.schedule_time = 'Schedule time is required';
 
+    const scheduleDate = new Date(appointment.schedule_date);
+    const scheduleTime = appointment.schedule_time;
+
+    if (scheduleDate.getDay() === 0) {
+      errors.schedule_date = 'No work on Sundays';
+    }
+    if (scheduleDate.getDay() === 6) {
+      errors.schedule_date = 'No work on Saturdays';
+    }
+
+    const [hours, minutes] = scheduleTime.split(':');
+    if (hours < 7 || (hours >= 16 && minutes > 0)) {
+      errors.schedule_time = 'Appointment must be within business hours (7 AM - 4 PM)';
+    }
+
+    const holidays = [
+      '2024-01-01', // New Year's Day
+      '2024-12-25', // Christmas
+      '2024-11-28', // Thanksgiving
+      '2024-09-02', // Labor Day
+      '2024-11-11', // Veterans Day
+      '2024-07-04', // 4th of July
+    ];
+
+    if (holidays.includes(appointment.schedule_date)) {
+      errors.schedule_date = 'No work on holidays';
+    }
+
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
