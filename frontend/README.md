@@ -1,70 +1,64 @@
-# Getting Started with Create React App
+Frontend Packages
+@date-io/date-fns v2.11.0
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Date library used by MUI date pickers.
+@emotion/react v11.11.4
 
-## Available Scripts
+CSS-in-JS library for styling React components.
+@emotion/styled v11.11.5
 
-In the project directory, you can run:
+Styled components library for React.
+@mui/icons-material v5.15.20
 
-### `npm start`
+Material-UI icons for React.
+@mui/material v5.15.20
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Material-UI components for React.
+@mui/x-date-pickers v7.7.0
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Material-UI date pickers.
+@mui/x-date-pickers-pro v6.0.0-alpha.1
 
-### `npm test`
+Pro version of Material-UI date pickers.
+@testing-library/jest-dom v5.17.0
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Custom jest matchers for asserting on DOM nodes.
+@testing-library/react v13.4.0
 
-### `npm run build`
+Testing utilities for React.
+@testing-library/user-event v13.5.0
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Simulates user interactions with the UI.
+axios v1.7.2
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Promise-based HTTP client for making requests to the backend.
+date-fns v2.30.0
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Modern JavaScript date utility library.
+moment v2.30.1
 
-### `npm run eject`
+Date and time manipulation library.
+notistack v3.0.1
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Snackbar library for notifications.
+react v18.3.1
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+JavaScript library for building user interfaces.
+react-big-calendar v1.13.0
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Calendar component for React.
+react-dom v18.3.1
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Entry point to the DOM and server renderers for React.
+react-router-dom v6.23.1
 
-## Learn More
+Declarative routing for React.
+react-scripts v5.0.1
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Create React App scripts for running the development server and building the project.
+web-vitals v2.1.4
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Library for measuring web performance metrics.
+Dev Dependencies
+@babel/plugin-proposal-private-property-in-object v7.21.11
+Babel plugin to support private properties in objects.
