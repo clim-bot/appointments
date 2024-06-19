@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
-import { Container, TextField, Button, Box, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, TextField, Button, Box, Typography, Autocomplete } from '@mui/material';
 import axiosInstance from '../../api/axiosInstance';
 import { useSnackbar } from 'notistack';
 
 const Reports = () => {
   const [client, setClient] = useState('');
+  const [clientOptions, setClientOptions] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await axiosInstance.get('/clients');
+        setClientOptions(response.data.clients);
+      } catch (error) {
+        console.error('Error fetching clients', error);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   const handleDownloadReport = async () => {
     if (!client) {
@@ -43,12 +57,19 @@ const Reports = () => {
     <Container>
       <Box mt={5}>
         <Typography variant="h4" align="center">Client Appointment Reports</Typography>
-        <TextField
-          label="Client Name"
-          value={client}
-          onChange={(e) => setClient(e.target.value)}
-          fullWidth
-          margin="normal"
+        <Autocomplete
+          options={clientOptions.map((option) => option.name)}
+          onInputChange={(event, newInputValue) => {
+            setClient(newInputValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Client Name"
+              margin="normal"
+              fullWidth
+            />
+          )}
         />
         <Button
           variant="contained"

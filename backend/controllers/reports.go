@@ -65,3 +65,4 @@ func generateCSVReport(client models.Client, appointments []models.Appointment) 
 
     return b.String(), nil
 }
+
