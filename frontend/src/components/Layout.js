@@ -4,6 +4,7 @@ import { Drawer, List, ListItem, ListItemText, IconButton, Box, AppBar, Toolbar,
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ScheduleIcon from '@mui/icons-material/Schedule';
+import ReportIcon from '@mui/icons-material/Assessment';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
@@ -56,6 +57,10 @@ const Layout = ({ children }) => {
             <ListItem button onClick={() => handleNavigation('/appointment')}>
               <ScheduleIcon />
               <ListItemText primary="Appointment" />
+            </ListItem>
+            <ListItem button onClick={() => handleNavigation('/reports')}>
+              <ReportIcon />
+              <ListItemText primary="Reports" />
             </ListItem>
             <ListItem button onClick={() => handleNavigation('/settings')}>
               <SettingsIcon />

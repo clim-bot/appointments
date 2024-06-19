@@ -4,6 +4,7 @@ import Login from './features/auth/Login';
 import Register from './features/auth/Register';
 import Dashboard from './features/dashboard/Dashboard';
 import Schedule from './features/appointment/Appointment';
+import Reports from './features/reports/Reports';
 import Settings from './features/settings/Settings';
 import ProtectedRoute from './features/auth/ProtectedRoute';
 import ResetPassword from './features/auth/ResetPassword';
@@ -20,6 +21,7 @@ const App = () => {
       <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="/appointment" element={<ProtectedRoute><Layout><Schedule /></Layout></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute><Layout><Reports /></Layout></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
