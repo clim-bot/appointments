@@ -35,5 +35,8 @@ func SetupRoutes(router *gin.Engine) {
 
         // Service routes
         protected.GET("/services", controllers.GetServices)
+
+        // Report routes
+        protected.GET("/download-report", controllers.DownloadReport)
     }
 }
