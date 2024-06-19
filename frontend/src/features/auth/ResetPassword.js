@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axiosInstance from '../../api/axiosInstance';
-import { Container, TextField, Button, Typography, Box } from '@mui/material';
+import { Container, TextField, Button, Typography, Box, InputAdornment, IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
@@ -8,6 +9,8 @@ const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const token = searchParams.get('token');
@@ -28,6 +31,14 @@ const ResetPassword = () => {
     }
   };
 
+  const handleClickShowNewPassword = () => {
+    setShowNewPassword(!showNewPassword);
+  };
+
+  const handleClickShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
     <Container maxWidth="sm">
       <Box mt={5}>
@@ -35,19 +46,37 @@ const ResetPassword = () => {
         <form onSubmit={handleSubmit}>
           <TextField
             label="New Password"
-            type="password"
+            type={showNewPassword ? 'text' : 'password'}
             fullWidth
             margin="normal"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleClickShowNewPassword}>
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             label="Confirm Password"
-            type="password"
+            type={showConfirmPassword ? 'text' : 'password'}
             fullWidth
             margin="normal"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleClickShowConfirmPassword}>
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Box mt={2}>
             <Button type="submit" variant="contained" color="primary" fullWidth>

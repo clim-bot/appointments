@@ -160,7 +160,9 @@ func ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	resetLink := fmt.Sprintf("http://localhost:3000/reset-password?token=%s", resetToken)
+	clientUrl := os.Getenv("CLIENT_URL")
+
+	resetLink := fmt.Sprintf(clientUrl + "/reset-password?token=%s", resetToken)
 	if err := sendResetEmail(req.Email, resetLink); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not send reset email"})
 		return
@@ -170,7 +172,16 @@ func ForgotPassword(c *gin.Context) {
 }
 
 func ResetPassword(c *gin.Context) {
-	var token, newPassword, confirmPassword models.User
+	var newPassword, confirmPassword models.User
+
+	var req struct {
+		Token   string `json:"token"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	if newPassword.Password != confirmPassword.Password {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Passwords do not match"})
@@ -178,7 +189,7 @@ func ResetPassword(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := config.DB.Where("reset_token = ? AND reset_token_expiry > ?", token.ResetToken, time.Now()).First(&user).Error; err != nil {
+	if err := config.DB.Where("reset_token = ? AND reset_token_expiry > ?", req.Token, time.Now()).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or expired token"})
 		return
 	}
