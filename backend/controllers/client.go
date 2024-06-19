@@ -5,6 +5,7 @@ import (
     "myapp/config"
     "myapp/models"
     "github.com/gin-gonic/gin"
+	"time"
 )
 
 func GetClients(c *gin.Context) {
@@ -54,9 +55,23 @@ func DeleteClient(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Client not found"})
 		return
 	}
+
+	// Check if client has upcoming appointments
+    var appointments []models.Appointment
+    if err := config.DB.Where("client_id = ? AND schedule_date >= ?", id, time.Now()).Find(&appointments).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking appointments"})
+        return
+    }
+
+    if len(appointments) > 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Client has upcoming appointments"})
+        return
+    }
+
 	if err := config.DB.Delete(&client).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Client deleted"})
 }

@@ -14,7 +14,11 @@ const DeleteClientDialog = ({ open, handleClose, fetchClients, setSnackbar, clie
       handleClose();
     } catch (error) {
       console.error('Delete client error', error);
-      setSnackbar({ message: 'Error deleting client', severity: 'error' });
+      if (error.response && error.response.status === 400) {
+        setSnackbar({ message: 'Client has upcoming appointments and cannot be deleted.', severity: 'error' });
+      } else {
+        setSnackbar({ message: 'Error deleting client', severity: 'error' });
+      }
     }
   };
 
