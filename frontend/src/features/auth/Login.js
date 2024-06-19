@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
-import { TextField, Button, Container, Typography, Box, FormControlLabel, Checkbox } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, FormControlLabel, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useSnackbar } from 'notistack';
 
 const Login = () => {
@@ -11,6 +11,8 @@ const Login = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [error, setError] = useState('');
+  const [forgotPasswordDialogOpen, setForgotPasswordDialogOpen] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -45,6 +47,21 @@ const Login = () => {
     } catch (error) {
       setError('Invalid email or password');
       enqueueSnackbar('Login failed. Please check your credentials.', { variant: 'error' });
+    }
+  };
+
+  const handleForgotPasswordSubmit = async () => {
+    if (!validateEmail(forgotPasswordEmail)) {
+      enqueueSnackbar('Invalid email address', { variant: 'error' });
+      return;
+    }
+
+    try {
+      await axiosInstance.post('/auth/forgot-password', { email: forgotPasswordEmail });
+      enqueueSnackbar('If the email exists, a reset password link has been sent.', { variant: 'info' });
+      setForgotPasswordDialogOpen(false);
+    } catch (error) {
+      enqueueSnackbar('Error sending reset password email. Please try again later.', { variant: 'error' });
     }
   };
 
@@ -98,8 +115,38 @@ const Login = () => {
               Don't have an account? <Button onClick={() => navigate('/register')}>Register</Button>
             </Typography>
           </Box>
+          <Box mt={2}>
+            <Typography align="center">
+              <Button onClick={() => setForgotPasswordDialogOpen(true)}>Forgot Password?</Button>
+            </Typography>
+          </Box>
         </form>
       </Box>
+      <Dialog open={forgotPasswordDialogOpen} onClose={() => setForgotPasswordDialogOpen(false)}>
+        <DialogTitle>Forgot Password</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please enter your email address. If the email exists, a reset password link will be sent.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Email Address"
+            type="email"
+            fullWidth
+            value={forgotPasswordEmail}
+            onChange={(e) => setForgotPasswordEmail(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setForgotPasswordDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleForgotPasswordSubmit} color="primary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
