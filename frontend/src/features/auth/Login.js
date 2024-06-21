@@ -45,8 +45,13 @@ const Login = () => {
       enqueueSnackbar('Login successful!', { variant: 'success' });
       navigate('/dashboard');
     } catch (error) {
-      setError('Invalid email or password');
-      enqueueSnackbar('Login failed. Please check your credentials.', { variant: 'error' });
+      if (error.response && error.response.status === 401 && error.response.data.error === "Account is not activated") {
+        setError('Account is not activated. Please check your email.');
+        enqueueSnackbar('Account is not activated. Please check your email.', { variant: 'error' });
+      } else {
+        setError('Invalid email or password');
+        enqueueSnackbar('Login failed. Please check your credentials.', { variant: 'error' });
+      }
     }
   };
 

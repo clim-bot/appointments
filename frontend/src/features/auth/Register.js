@@ -46,7 +46,7 @@ const Register = () => {
 
     try {
       await axiosInstance.post('/auth/register', { name, email, password });
-      enqueueSnackbar('Registration successful! Please login.', { variant: 'success' });
+      enqueueSnackbar('Registration successful! Please check your email to activate your account.', { variant: 'success' });
       navigate('/login');
     } catch (error) {
       setError('Error registering user');

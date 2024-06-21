@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Login from './features/auth/Login';
 import Register from './features/auth/Register';
+import ActivateAccount from './features/auth/ActivateAccount';
 import Dashboard from './features/dashboard/Dashboard';
 import Schedule from './features/appointment/Appointment';
 import Reports from './features/reports/Reports';
@@ -17,6 +18,7 @@ const App = () => {
     <Routes>
       <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
       <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
+      <Route path="/activate-account" element={<ActivateAccount />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />

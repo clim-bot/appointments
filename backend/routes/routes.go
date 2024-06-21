@@ -14,6 +14,7 @@ func SetupRoutes(router *gin.Engine) {
         auth.POST("/login", controllers.Login)
         auth.POST("/forgot-password", controllers.ForgotPassword)
 		auth.POST("/reset-password", controllers.ResetPassword)
+        auth.POST("/activate-account", controllers.ActivateAccount)
     }
 
     protected := router.Group("/")

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"crypto/rand"
+    "encoding/hex"
 	"fmt"
 	"log"
 	"myapp/config"
@@ -16,6 +18,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func generateActivationToken() (string, error) {
+    bytes := make([]byte, 16)
+    if _, err := rand.Read(bytes); err != nil {
+        return "", err
+    }
+    return hex.EncodeToString(bytes), nil
+}
+
 func Register(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -30,16 +40,78 @@ func Register(c *gin.Context) {
 	}
 	user.Password = string(hashedPassword)
 
-	if err := config.DB.Create(&user).Error; err != nil {
-		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Email is already registered"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		}
-		return
-	}
+	activationToken, err := generateActivationToken()
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate activation token"})
+        return
+    }
+    user.ActivationToken = activationToken
+    user.Activated = false
 
-	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
+    if err := config.DB.Create(&user).Error; err != nil {
+        if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Email is already registered"})
+        } else {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        }
+        return
+    }
+
+    clientUrl := os.Getenv("CLIENT_URL")
+    activationLink := fmt.Sprintf(clientUrl+"/activate-account?token=%s", activationToken)
+    if err := sendActivationEmail(user.Email, activationLink); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not send activation email"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Registration successful, please check your email to activate your account"})
+}
+
+func sendActivationEmail(email, activationLink string) error {
+    from := "no-reply@appt-mail.com"
+    password := "" // No password needed for MailHog
+    smtpHost := "localhost"
+    smtpPort := "1025"
+
+    to := []string{email}
+    subject := "Account Activation"
+    body := fmt.Sprintf("Please click the link below to activate your account:\n\n%s", activationLink)
+
+    message := []byte("Subject: " + subject + "\r\n" +
+        "To: " + email + "\r\n" +
+        "From: " + from + "\r\n" +
+        "\r\n" +
+        body + "\r\n")
+
+    auth := smtp.PlainAuth("", from, password, smtpHost)
+    err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+    return err
+}
+
+func ActivateAccount(c *gin.Context) {
+    var req struct {
+        Token string `json:"token"`
+    }
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    var user models.User
+    if err := config.DB.Where("activation_token = ?", req.Token).First(&user).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or expired token"})
+        return
+    }
+
+    user.ActivationToken = ""
+    user.Activated = true
+
+    if err := config.DB.Save(&user).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Account activated successfully"})
 }
 
 func Login(c *gin.Context) {
@@ -56,23 +128,28 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	if !user.Activated {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Account is not activated"})
+        return
+    }
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginUser.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-		return
-	}
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+        return
+    }
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	})
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "user_id": user.ID,
+        "exp":     time.Now().Add(time.Hour * 24).Unix(),
+    })
 
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
-		return
-	}
+    tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+    c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
 func Profile(c *gin.Context) {
